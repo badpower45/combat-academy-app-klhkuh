@@ -192,10 +192,12 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1000,
     alignItems: 'center',
+    pointerEvents: 'box-none',
   },
   container: {
     marginHorizontal: 20,
     alignSelf: 'center',
+    pointerEvents: 'auto',
   },
   blurContainer: {
     overflow: 'hidden',

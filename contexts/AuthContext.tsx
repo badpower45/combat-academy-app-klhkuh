@@ -24,20 +24,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>({
+    id: '1',
+    email: 'admin@academy.com',
+    fullName: 'Admin User',
+    role: 'admin',
+    memberSince: '2024',
+  });
 
   const login = async (email: string, password: string, role?: UserRole) => {
     console.log('Login attempt:', { email, role });
     
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Mock user data
     const mockUser: User = {
       id: '1',
       email,
-      fullName: 'John Doe',
-      role: role || 'fan',
+      fullName: email.includes('admin') ? 'Admin User' : 'John Doe',
+      role: email.includes('admin') ? 'admin' : (role || 'fan'),
       memberSince: '2024',
     };
     
@@ -47,10 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, fullName: string, role: UserRole) => {
     console.log('Register attempt:', { email, fullName, role });
     
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Mock user data
     const mockUser: User = {
       id: '1',
       email,
@@ -63,12 +65,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    console.log('User logged out');
     setUser(null);
   };
 
   const updateUserRole = (role: UserRole) => {
     if (user) {
       setUser({ ...user, role });
+      console.log('User role updated to:', role);
     }
   };
 
@@ -91,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new error('useAuth must be used within AuthProvider');
   }
   return context;
 };

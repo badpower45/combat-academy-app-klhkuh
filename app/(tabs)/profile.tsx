@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View, Text, Pressable, Image, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Pressable, Image, Alert, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useLocalization } from '@/contexts/LocalizationContext';
@@ -53,6 +53,9 @@ export default function ProfileScreen() {
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    scrollContent: {
+      paddingBottom: Platform.OS === 'ios' ? 20 : 120,
     },
     header: {
       padding: 20,
@@ -162,6 +165,7 @@ export default function ProfileScreen() {
       borderRadius: 12,
       justifyContent: 'center',
       marginTop: 8,
+      marginBottom: 20,
     },
     logoutButtonText: {
       fontSize: 16,
@@ -171,7 +175,6 @@ export default function ProfileScreen() {
     },
     guestContainer: {
       padding: 20,
-      alignItems: 'center',
     },
     guestText: {
       fontSize: 16,
@@ -199,7 +202,7 @@ export default function ProfileScreen() {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1000,
@@ -252,64 +255,66 @@ export default function ProfileScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.container}>
-          <View style={styles.header}>
-            <View style={styles.avatarContainer}>
-              <IconSymbol name="person.fill" size={50} color={colors.textSecondary} />
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.header}>
+              <View style={styles.avatarContainer}>
+                <IconSymbol name="person.fill" size={50} color={colors.textSecondary} />
+              </View>
+              <Text style={styles.name}>Guest User</Text>
+              <Text style={styles.email}>Please sign in to continue</Text>
             </View>
-            <Text style={styles.name}>Guest User</Text>
-            <Text style={styles.email}>Please sign in to continue</Text>
-          </View>
 
-          <View style={styles.guestContainer}>
-            <Text style={styles.guestText}>
-              Sign in to access your profile, track your progress, and register for competitions.
-            </Text>
-            <Pressable
-              style={styles.authButton}
-              onPress={() => router.push('/auth/login')}
-            >
-              <Text style={styles.authButtonText}>{t('signIn')}</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.authButton, { backgroundColor: colors.primary }]}
-              onPress={() => router.push('/auth/register')}
-            >
-              <Text style={styles.authButtonText}>{t('createAccount')}</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.content}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('settings')}</Text>
+            <View style={styles.guestContainer}>
+              <Text style={styles.guestText}>
+                Sign in to access your profile, track your progress, and register for competitions.
+              </Text>
               <Pressable
-                style={styles.menuItem}
-                onPress={() => setShowLanguageModal(true)}
+                style={styles.authButton}
+                onPress={() => router.push('/auth/login')}
               >
-                <IconSymbol name="globe" size={24} color={colors.secondary} />
-                <View style={styles.menuItemContent}>
-                  <Text style={styles.menuItemTitle}>{t('language')}</Text>
-                  <Text style={styles.menuItemSubtitle}>
-                    {locale === 'en' ? 'English' : 'العربية'}
-                  </Text>
-                </View>
-                <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+                <Text style={styles.authButtonText}>{t('signIn')}</Text>
               </Pressable>
-
               <Pressable
-                style={styles.menuItem}
-                onPress={() => setShowThemeModal(true)}
+                style={[styles.authButton, { backgroundColor: colors.primary }]}
+                onPress={() => router.push('/auth/register')}
               >
-                <IconSymbol name="moon.fill" size={24} color={colors.secondary} />
-                <View style={styles.menuItemContent}>
-                  <Text style={styles.menuItemTitle}>{t('theme')}</Text>
-                  <Text style={styles.menuItemSubtitle}>
-                    {themeMode === 'dark' ? t('darkMode') : themeMode === 'light' ? t('lightMode') : t('systemDefault')}
-                  </Text>
-                </View>
-                <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+                <Text style={styles.authButtonText}>{t('createAccount')}</Text>
               </Pressable>
             </View>
-          </View>
+
+            <View style={styles.content}>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{t('settings')}</Text>
+                <Pressable
+                  style={styles.menuItem}
+                  onPress={() => setShowLanguageModal(true)}
+                >
+                  <IconSymbol name="globe" size={24} color={colors.secondary} />
+                  <View style={styles.menuItemContent}>
+                    <Text style={styles.menuItemTitle}>{t('language')}</Text>
+                    <Text style={styles.menuItemSubtitle}>
+                      {locale === 'en' ? 'English' : 'العربية'}
+                    </Text>
+                  </View>
+                  <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+                </Pressable>
+
+                <Pressable
+                  style={styles.menuItem}
+                  onPress={() => setShowThemeModal(true)}
+                >
+                  <IconSymbol name="moon.fill" size={24} color={colors.secondary} />
+                  <View style={styles.menuItemContent}>
+                    <Text style={styles.menuItemTitle}>{t('theme')}</Text>
+                    <Text style={styles.menuItemSubtitle}>
+                      {themeMode === 'dark' ? t('darkMode') : themeMode === 'light' ? t('lightMode') : t('systemDefault')}
+                    </Text>
+                  </View>
+                  <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+                </Pressable>
+              </View>
+            </View>
+          </ScrollView>
 
           {showLanguageModal && (
             <Pressable
@@ -397,7 +402,7 @@ export default function ProfileScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             {user?.avatar ? (

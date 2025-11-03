@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function TabLayout() {
   const { user } = useAuth();
   const isFighter = user?.role === 'fighter';
+  const isAdmin = user?.role === 'admin';
 
   const tabs: TabBarItem[] = [
     {
@@ -41,6 +42,12 @@ export default function TabLayout() {
       icon: 'person.2.fill',
       label: 'Fighters',
     },
+    ...(isAdmin ? [{
+      name: 'admin',
+      route: '/(tabs)/admin',
+      icon: 'crown.fill',
+      label: 'Admin',
+    }] : []),
     {
       name: 'profile',
       route: '/(tabs)/profile',
@@ -48,6 +55,12 @@ export default function TabLayout() {
       label: 'Profile',
     },
   ];
+
+  // Calculate container width based on number of tabs
+  const calculateContainerWidth = () => {
+    const baseWidth = 70; // Width per tab
+    return Math.min(tabs.length * baseWidth, 420);
+  };
 
   if (Platform.OS === 'ios') {
     return (
@@ -74,13 +87,15 @@ export default function TabLayout() {
           <Icon sf="person.2.fill" drawable="ic_fighters" />
           <Label>Fighters</Label>
         </NativeTabs.Trigger>
+        {isAdmin && (
+          <NativeTabs.Trigger name="admin">
+            <Icon sf="crown.fill" drawable="ic_admin" />
+            <Label>Admin</Label>
+          </NativeTabs.Trigger>
+        )}
         <NativeTabs.Trigger name="profile">
           <Icon sf="person.fill" drawable="ic_profile" />
           <Label>Profile</Label>
-        </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="admin">
-          <Icon sf="crown.fill" drawable="ic_admin" />
-          <Label>Admin</Label>
         </NativeTabs.Trigger>
       </NativeTabs>
     );
@@ -99,10 +114,10 @@ export default function TabLayout() {
         <Stack.Screen name="tournaments" />
         <Stack.Screen name="competitions" />
         <Stack.Screen name="fighters" />
-        <Stack.Screen name="profile" />
         <Stack.Screen name="admin" />
+        <Stack.Screen name="profile" />
       </Stack>
-      <FloatingTabBar tabs={tabs} containerWidth={isFighter ? 360 : 320} />
+      <FloatingTabBar tabs={tabs} containerWidth={calculateContainerWidth()} />
     </>
   );
 }
