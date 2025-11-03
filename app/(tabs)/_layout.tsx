@@ -62,6 +62,10 @@ export default function TabLayout() {
           <Icon sf="person.fill" drawable="ic_profile" />
           <Label>Profile</Label>
         </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="admin">
+          <Icon sf="crown.fill" drawable="ic_admin" />
+          <Label>Admin</Label>
+        </NativeTabs.Trigger>
       </NativeTabs>
     );
   }
@@ -79,6 +83,7 @@ export default function TabLayout() {
         <Stack.Screen name="tournaments" />
         <Stack.Screen name="fighters" />
         <Stack.Screen name="profile" />
+        <Stack.Screen name="admin" />
       </Stack>
       <FloatingTabBar tabs={tabs} containerWidth={320} />
     </>
