@@ -3,54 +3,196 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Platform, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
-import { colors, commonStyles } from '@/styles/commonStyles';
+import { useLocalization } from '@/contexts/LocalizationContext';
+import { useThemeContext } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useLocalization();
+  const { colors } = useThemeContext();
+  const { register } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('error'), 'Please fill in all fields');
       return;
     }
 
     if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      Alert.alert(t('error'), 'Please enter a valid email address');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      Alert.alert(t('error'), 'Password must be at least 6 characters long');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(t('error'), 'Passwords do not match');
       return;
     }
 
-    console.log('Registration attempt:', { fullName, email });
+    setLoading(true);
     
-    // Simulate registration success
-    Alert.alert('Success', 'Account created successfully!', [
-      {
-        text: 'OK',
-        onPress: () => router.replace('/(tabs)/(home)/'),
-      },
-    ]);
+    try {
+      // Register with a default role, will be updated in role selection
+      await register(email, password, fullName, 'fan');
+      
+      // Navigate to role selection
+      router.replace('/auth/role-selection');
+    } catch (error) {
+      Alert.alert(t('error'), 'Registration failed. Please try again.');
+      console.error('Registration error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const styles = StyleSheet.create({
+    scrollContent: {
+      flexGrow: 1,
+    },
+    container: {
+      flex: 1,
+      padding: 24,
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: 32,
+    },
+    logoContainer: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: colors.highlight,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    form: {
+      marginBottom: 24,
+    },
+    inputGroup: {
+      marginBottom: 16,
+    },
+    inputLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    input: {
+      flex: 1,
+      paddingVertical: 16,
+      paddingHorizontal: 12,
+      fontSize: 16,
+      color: colors.text,
+    },
+    termsContainer: {
+      marginVertical: 16,
+    },
+    termsText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    termsLink: {
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    registerButton: {
+      backgroundColor: colors.secondary,
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+      boxShadow: '0px 4px 12px rgba(3, 218, 198, 0.4)',
+      elevation: 6,
+    },
+    registerButtonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 24,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    dividerText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginHorizontal: 16,
+    },
+    socialButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      paddingVertical: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    socialButtonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      marginLeft: 12,
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loginText: {
+      color: colors.primary,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    textSecondary: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+  });
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: 'Create Account',
+          title: t('createAccount'),
           headerShown: true,
           headerStyle: {
             backgroundColor: colors.background,
@@ -59,7 +201,7 @@ export default function RegisterScreen() {
         }}
       />
       <KeyboardAvoidingView
-        style={commonStyles.container}
+        style={{ flex: 1, backgroundColor: colors.background }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
@@ -67,19 +209,17 @@ export default function RegisterScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.container}>
-            {/* Logo/Header */}
             <View style={styles.header}>
               <View style={styles.logoContainer}>
                 <IconSymbol name="person.badge.plus.fill" size={64} color={colors.secondary} />
               </View>
-              <Text style={styles.title}>Create Account</Text>
-              <Text style={commonStyles.textSecondary}>Join the academy today</Text>
+              <Text style={styles.title}>{t('createAccount')}</Text>
+              <Text style={styles.textSecondary}>Join the academy today</Text>
             </View>
 
-            {/* Registration Form */}
             <View style={styles.form}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Full Name</Text>
+                <Text style={styles.inputLabel}>{t('fullName')}</Text>
                 <View style={styles.inputContainer}>
                   <IconSymbol name="person.fill" size={20} color={colors.textSecondary} />
                   <TextInput
@@ -94,7 +234,7 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Email</Text>
+                <Text style={styles.inputLabel}>{t('email')}</Text>
                 <View style={styles.inputContainer}>
                   <IconSymbol name="envelope.fill" size={20} color={colors.textSecondary} />
                   <TextInput
@@ -111,7 +251,7 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Password</Text>
+                <Text style={styles.inputLabel}>{t('password')}</Text>
                 <View style={styles.inputContainer}>
                   <IconSymbol name="lock.fill" size={20} color={colors.textSecondary} />
                   <TextInput
@@ -135,7 +275,7 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Confirm Password</Text>
+                <Text style={styles.inputLabel}>{t('confirmPassword')}</Text>
                 <View style={styles.inputContainer}>
                   <IconSymbol name="lock.fill" size={20} color={colors.textSecondary} />
                   <TextInput
@@ -167,8 +307,14 @@ export default function RegisterScreen() {
                 </Text>
               </View>
 
-              <Pressable style={styles.registerButton} onPress={handleRegister}>
-                <Text style={styles.registerButtonText}>Create Account</Text>
+              <Pressable 
+                style={styles.registerButton} 
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                <Text style={styles.registerButtonText}>
+                  {loading ? t('loading') : t('createAccount')}
+                </Text>
               </Pressable>
 
               <View style={styles.divider}>
@@ -188,11 +334,10 @@ export default function RegisterScreen() {
               </Pressable>
             </View>
 
-            {/* Login Link */}
             <View style={styles.footer}>
-              <Text style={commonStyles.textSecondary}>Already have an account? </Text>
+              <Text style={styles.textSecondary}>{t('alreadyHaveAccount')} </Text>
               <Pressable onPress={() => router.back()}>
-                <Text style={styles.loginText}>Sign In</Text>
+                <Text style={styles.loginText}>{t('signIn')}</Text>
               </Pressable>
             </View>
           </View>
@@ -201,129 +346,3 @@ export default function RegisterScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.highlight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  form: {
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    color: colors.text,
-  },
-  termsContainer: {
-    marginVertical: 16,
-  },
-  termsText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  termsLink: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  registerButton: {
-    backgroundColor: colors.secondary,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    boxShadow: '0px 4px 12px rgba(3, 218, 198, 0.4)',
-    elevation: 6,
-  },
-  registerButtonText: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginHorizontal: 16,
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  socialButtonText: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 12,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loginText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});

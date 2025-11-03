@@ -4,8 +4,12 @@ import { Platform } from 'react-native';
 import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
 import { Stack } from 'expo-router';
 import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
+  const { user } = useAuth();
+  const isFighter = user?.role === 'fighter';
+
   const tabs: TabBarItem[] = [
     {
       name: '(home)',
@@ -25,6 +29,12 @@ export default function TabLayout() {
       icon: 'trophy.fill',
       label: 'Tournaments',
     },
+    ...(isFighter ? [{
+      name: 'competitions',
+      route: '/(tabs)/competitions',
+      icon: 'flag.checkered',
+      label: 'Competitions',
+    }] : []),
     {
       name: 'fighters',
       route: '/(tabs)/fighters',
@@ -54,6 +64,12 @@ export default function TabLayout() {
           <Icon sf="trophy.fill" drawable="ic_tournaments" />
           <Label>Tournaments</Label>
         </NativeTabs.Trigger>
+        {isFighter && (
+          <NativeTabs.Trigger name="competitions">
+            <Icon sf="flag.checkered" drawable="ic_competitions" />
+            <Label>Competitions</Label>
+          </NativeTabs.Trigger>
+        )}
         <NativeTabs.Trigger name="fighters">
           <Icon sf="person.2.fill" drawable="ic_fighters" />
           <Label>Fighters</Label>
@@ -81,11 +97,12 @@ export default function TabLayout() {
         <Stack.Screen name="(home)" />
         <Stack.Screen name="live" />
         <Stack.Screen name="tournaments" />
+        <Stack.Screen name="competitions" />
         <Stack.Screen name="fighters" />
         <Stack.Screen name="profile" />
         <Stack.Screen name="admin" />
       </Stack>
-      <FloatingTabBar tabs={tabs} containerWidth={320} />
+      <FloatingTabBar tabs={tabs} containerWidth={isFighter ? 360 : 320} />
     </>
   );
 }
